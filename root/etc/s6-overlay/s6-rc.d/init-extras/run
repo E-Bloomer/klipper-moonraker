@@ -1,0 +1,32 @@
+#!/usr/bin/with-contenv bash
+
+set -e
+
+mkdir -p /run/klipper-temp \
+    /config/printer_data/gcodes \
+    /config/printer_data/logs \
+    /config/printer_data/database \
+    /config/printer_data/config \
+    /config/extras
+
+# Define source and target directories
+SRC_DIR="/config/extras"
+DEST_DIR="/app/klipper/klippy/extras"
+
+# Find all files in source directory and create symlinks with directory structure
+find "$SRC_DIR" -type f | while read -r file; do
+    # Get relative path
+    rel_path="${file#$SRC_DIR/}"
+    
+    # Get destination path
+    dest_file="$DEST_DIR/$rel_path"
+        
+    # Check if destination file already exists
+    if [ -e "$dest_file" ] || [ -L "$dest_file" ]; then
+        echo "Skipping: $rel_path (already exists in destination)"
+    else
+        # Create symlink preserving directory structure
+        ln -s "$file" "$dest_file"
+        echo "Created symlink for $rel_path"
+    fi
+done

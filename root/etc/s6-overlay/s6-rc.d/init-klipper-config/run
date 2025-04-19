@@ -1,0 +1,26 @@
+#!/usr/bin/with-contenv bash
+
+set -e
+
+if [ ! -f /config/printer_data/config/moonraker.conf ]; then
+    cp /defaults/moonraker.conf /config/printer_data/config/moonraker.conf
+fi
+
+if [ ! -f /config/printer_data/config/printer.cfg ]; then
+    cp /defaults/printer.cfg /config/printer_data/config/printer.cfg
+fi
+
+if [ -z "$(find /config/printer_data/config/ -name '*macros.cfg' -type f 2>/dev/null)" ]; then
+    cp /defaults/*macros.cfg /config/printer_data/config/
+fi
+
+#File premissions
+
+lsiown -R abc:abc \
+    /config \
+    /run/klipper-temp
+
+git config --system --add safe.directory /app/moonraker
+
+usermod -a -G dialout abc && \
+usermod -a -G tty abc 
